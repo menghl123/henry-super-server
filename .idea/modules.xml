@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/henry-common/henry-common.iml" filepath="$PROJECT_DIR$/henry-common/henry-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/henry-file/henry-file.iml" filepath="$PROJECT_DIR$/henry-file/henry-file.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/henry-super-server.iml" filepath="$PROJECT_DIR$/.idea/henry-super-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/henry-user/henry-user.iml" filepath="$PROJECT_DIR$/henry-user/henry-user.iml" />
+    </modules>
+  </component>
+</project>
