@@ -1,5 +1,7 @@
 package com.henry.user.domain.model;
 
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 /**
