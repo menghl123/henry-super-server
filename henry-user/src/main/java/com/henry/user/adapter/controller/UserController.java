@@ -1,7 +1,7 @@
 package com.henry.user.adapter.controller;
 
 import com.henry.common.entity.PageQuery;
-import com.henry.common.result.PageResult;
+import com.henry.common.result.StandardPage;
 import com.henry.common.result.Result;
 import com.henry.user.application.UserApplicationService;
 import com.henry.user.application.dto.CreateUserRequest;
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @GetMapping("/page")
-    public Result<PageResult<UserDTO>> page(PageQuery query) {
+    public Result<StandardPage<UserDTO>> page(PageQuery query) {
         return Result.success(userApplicationService.pageUsers(query));
     }
 

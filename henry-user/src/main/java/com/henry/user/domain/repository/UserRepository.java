@@ -1,7 +1,7 @@
 package com.henry.user.domain.repository;
 
 import com.henry.common.entity.PageQuery;
-import com.henry.common.result.PageResult;
+import com.henry.common.result.StandardPage;
 import com.henry.user.domain.model.User;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ public interface UserRepository {
 
     boolean existsByName(String username);
 
-    PageResult<User> page(PageQuery query);
+    StandardPage<User> page(PageQuery query);
 
     User save(User user);
 }

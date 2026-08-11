@@ -2,7 +2,7 @@ package com.henry.user.application;
 
 import com.henry.common.entity.PageQuery;
 import com.henry.common.exception.BusinessException;
-import com.henry.common.result.PageResult;
+import com.henry.common.result.StandardPage;
 import com.henry.common.result.ResultCode;
 import com.henry.common.security.JwtUtils;
 import com.henry.common.security.LoginUser;
@@ -51,12 +51,12 @@ public class UserApplicationService {
         return toDTO(user);
     }
 
-    public PageResult<UserDTO> pageUsers(PageQuery query) {
-        PageResult<User> page = userRepository.page(query);
-        List<UserDTO> dtos = page.getRecords().stream()
+    public StandardPage<UserDTO> pageUsers(PageQuery query) {
+        StandardPage<User> page = userRepository.page(query);
+        List<UserDTO> dtos = page.getData().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
-        return PageResult.of(page.getTotal(), dtos, page.getPageNum(), page.getPageSize());
+        return StandardPage.of(page.getTotal(), dtos, page.getPageIndex(), page.getPageSize());
     }
 
     @Transactional

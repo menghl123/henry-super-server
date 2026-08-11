@@ -11,7 +11,11 @@
       "Bash(tasklist //FI \"PID eq 5200\")",
       "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8083/user/page)",
       "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST http://localhost:8083/user/login -H \"Content-Type: application/json\" -d '{}')",
-      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST http://localhost:8083/user/login -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')"
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST http://localhost:8083/user/login -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "Bash(mvn -q clean compile -DskipTests)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
