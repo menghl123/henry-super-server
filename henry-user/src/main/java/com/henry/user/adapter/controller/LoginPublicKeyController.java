@@ -1,7 +1,7 @@
 package com.henry.user.adapter.controller;
 
 import com.henry.common.response.StandardResponse;
-import com.henry.user.application.security.LoginSecurityProperties;
+import com.henry.user.application.support.PasswordSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class LoginPublicKeyController {
 
-    private final LoginSecurityProperties loginSecurityProperties;
+    private final PasswordSupport passwordSupport;
 
     @GetMapping("/public-key")
     public StandardResponse<String> publicKey() {
-        return StandardResponse.success(loginSecurityProperties.getPublicKey());
+        return StandardResponse.success(passwordSupport.publicKey());
     }
 }

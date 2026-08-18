@@ -1,62 +1,26 @@
 package com.henry.user.infrastructure.converter;
 
+import com.henry.common.ddd.domain.MappableEnum;
 import com.henry.common.ddd.infrasturcture.BaseConverter;
 import com.henry.user.domain.model.User;
+import com.henry.user.domain.model.UserStatus;
 import com.henry.user.infrastructure.persistence.UserPO;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
 
 /**
- * 领域模型 <-> 持久化模型 转换器
+ * 用户持久化转换器：领域模型 <-> 持久化模型，MapStruct 编译期自动生成实现（Spring bean）。
+ * User 无无参构造/setter，依赖 @SuperBuilder 供 MapStruct 构建器探测构造。
  */
-@Component
-public class UserConverter implements BaseConverter<User, UserPO> {
+@Mapper(componentModel = "spring")
+public interface UserConverter extends BaseConverter<User, UserPO> {
 
-    @Override
-    public UserPO toPO(final User user) {
-        return UserPO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .nickname(user.getNickname())
-                .status(user.getStatus())
-                .creatorId(user.getCreatorId())
-                .creatorName(user.getCreatorName())
-                .createdTime(user.getCreatedTime())
-                .modifierId(user.getModifierId())
-                .modifierName(user.getModifierName())
-                .modifiedTime(user.getModifiedTime())
-                .deleted(user.getDeleted())
-                .build();
+    /** 领域枚举 -> 数据库整型：持久化 UserStatus 的 code */
+    default Integer map(UserStatus status) {
+        return status == null ? null : status.getCode();
     }
 
-    @Override
-    public User toEntity(final UserPO po) {
-        return User.builder()
-                .id(po.getId())
-                .username(po.getUsername())
-                .password(po.getPassword())
-                .nickname(po.getNickname())
-                .status(po.getStatus())
-                .creatorId(po.getCreatorId())
-                .creatorName(po.getCreatorName())
-                .createdTime(po.getCreatedTime())
-                .modifierId(po.getModifierId())
-                .modifierName(po.getModifierName())
-                .modifiedTime(po.getModifiedTime())
-                .deleted(po.getDeleted())
-                .build();
-    }
-
-    @Override
-    public List<UserPO> toPO(final List<User> users) {
-        return users.stream().map(this::toPO).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> toEntity(final List<UserPO> pos) {
-        return pos.stream().map(this::toEntity).collect(Collectors.toList());
+    /** 数据库整型 -> 领域枚举：复用 common 的 MappableEnum.fromCode 解析 */
+    default UserStatus map(Integer code) {
+        return code == null ? null : MappableEnum.fromCode(UserStatus.class, code);
     }
 }

@@ -37,5 +37,6 @@ public class AuditPO implements Auditable {
     private LocalDateTime modifiedTime;
 
     @TableLogic(value = "0", delval = "1")
+    @TableField(value = "deleted")
     private Boolean deleted;
 }

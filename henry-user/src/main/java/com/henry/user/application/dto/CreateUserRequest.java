@@ -12,8 +12,11 @@ public class CreateUserRequest {
     @Size(max = 50, message = "用户名不能超过50个字符")
     private String username;
 
+    /**
+     * 密码：先调用 /user/login/public-key 获取公钥，用 RSA 加密后 base64 提交。
+     * 长度校验（6-32 位）在服务端解密后执行，见 UserApplicationService.createUser
+     */
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 32, message = "密码长度需在6-32位之间")
     private String password;
 
     @Size(max = 50, message = "昵称不能超过50个字符")

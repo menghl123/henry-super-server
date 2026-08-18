@@ -1,22 +1,27 @@
 package com.henry.user.application.dto;
 
-import lombok.Value;
-
-import java.time.LocalDateTime;
+import com.henry.common.ddd.application.dto.response.AuditDTO;
+import com.henry.user.domain.model.UserStatus;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 用户输出 DTO（不含密码）
  */
-@Value
-public class UserDTO {
+@Data
+@NoArgsConstructor
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+public class UserDTO extends AuditDTO {
 
-    Long id;
+    private Long id;
 
-    String username;
+    private String username;
 
-    String nickname;
+    private String nickname;
 
-    Integer status;
-
-    LocalDateTime createTime;
+    /** 用户状态（序列化为 code：0-禁用 1-正常） */
+    private UserStatus status;
 }

@@ -1,24 +1,26 @@
-package com.henry.user.application;
+package com.henry.user.application.service;
 
 import com.henry.common.auth.AuthenticateService;
 import com.henry.common.auth.model.UserToken;
 import com.henry.common.query.PageQuery;
 import com.henry.common.response.StandardPage;
+import com.henry.user.application.assembler.UserAssembler;
 import com.henry.user.application.dto.CreateUserRequest;
 import com.henry.user.application.dto.LoginRequest;
 import com.henry.user.application.dto.LoginResponse;
 import com.henry.user.application.dto.UpdateUserRequest;
 import com.henry.user.application.dto.UserDTO;
-import com.henry.user.application.security.PasswordCipher;
-import com.henry.user.domain.model.User;
 import com.henry.user.application.repository.UserRepository;
+import com.henry.user.application.support.PasswordSupport;
+import com.henry.user.domain.model.User;
+import com.henry.user.domain.model.UserStatus;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 
 /**
  * 用户应用服务：编排领域逻辑，事务与安全在此层
@@ -33,16 +35,17 @@ public class UserApplicationService {
     private static final int PASSWORD_MIN_LENGTH = 6;
     private static final int PASSWORD_MAX_LENGTH = 32;
 
-    private final UserRepository userRepository;
     private final AuthenticateService authenticateService;
-    private final PasswordCipher passwordCipher;
+    private final PasswordSupport passwordSupport;
     private final PasswordEncoder passwordEncoder;
+    private final UserAssembler userAssembler;
+    private final UserRepository userRepository;
 
     public LoginResponse login(LoginRequest request) {
         final User user = userRepository.findByName(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("用户名或密码错误"));
         // 密码经公钥加密传输，解密后与 BCrypt 加盐哈希比对
-        final String rawPassword = passwordCipher.decrypt(request.getPassword());
+        final String rawPassword = passwordSupport.decrypt(request.getPassword());
         if (!user.matchesPassword(rawPassword, passwordEncoder)) {
             throw new IllegalArgumentException("用户名或密码错误");
         }
@@ -61,12 +64,12 @@ public class UserApplicationService {
     public UserDTO getUserById(Long id) {
         final User user = userRepository.find(id)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        return toDTO(user);
+        return userAssembler.toDTO(user);
     }
 
     public StandardPage<UserDTO> pageUsers(PageQuery query) {
         return userRepository.page(query)
-                .converter(users -> users.stream().map(this::toDTO).collect(Collectors.toList()));
+                .converter(userAssembler::toDTO);
     }
 
     @Transactional
@@ -75,7 +78,7 @@ public class UserApplicationService {
             throw new IllegalArgumentException("用户名已存在");
         }
         // 密码经公钥加密传输，解密后做业务校验并 BCrypt 加盐哈希存储
-        final String rawPassword = passwordCipher.decrypt(request.getPassword());
+        final String rawPassword = passwordSupport.decrypt(request.getPassword());
         if (rawPassword.length() < PASSWORD_MIN_LENGTH || rawPassword.length() > PASSWORD_MAX_LENGTH) {
             throw new IllegalArgumentException("密码长度需在6-32位之间");
         }
@@ -91,33 +94,18 @@ public class UserApplicationService {
         final User user = userRepository.find(id)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         final String nickname = request.getNickname() != null ? request.getNickname() : user.getNickname();
-        final Integer status = request.getStatus() != null ? request.getStatus() : user.getStatus();
+        final UserStatus status = request.getStatus() != null ? request.getStatus() : user.getStatus();
         final User updated = user.toBuilder()
                 .nickname(nickname)
                 .status(status)
                 .build();
         userRepository.update(updated);
-        return toDTO(updated);
+        return userAssembler.toDTO(updated);
     }
 
     public void deleteUser(Long id) {
         userRepository.find(id)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         userRepository.remove(id);
-    }
-
-    private UserDTO toDTO(User user) {
-        return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .nickname(user.getNickname())
-                .status(user.getStatus())
-                .creatorId(user.getCreatorId())
-                .creatorName(user.getCreatorName())
-                .createdTime(user.getCreatedTime())
-                .modifierId(user.getModifierId())
-                .modifierName(user.getModifierName())
-                .modifiedTime(user.getModifiedTime())
-                .build();
     }
 }

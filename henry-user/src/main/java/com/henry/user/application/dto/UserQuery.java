@@ -26,7 +26,7 @@ public class UserQuery extends PageQuery {
     @Query(value = Query.Condition.LIKE)
     private String nickname;
 
-    /** 状态精准搜索 1-正常 0-禁用 */
+    /** 状态精准搜索：UserStatus.code（0-禁用 1-正常） */
     @Query(value = Query.Condition.EQ)
     private Integer status;
 }

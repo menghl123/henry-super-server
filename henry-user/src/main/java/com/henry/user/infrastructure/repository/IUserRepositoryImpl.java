@@ -20,7 +20,7 @@ import java.util.Optional;
  * 用户仓储实现：继承框架 CRUD 基类，补充按用户名查询能力
  */
 @Repository
-public class UserRepositoryImpl extends CurdRepositoryImpl<Long, User, UserPO, UserMapper, UserConverter>
+public class IUserRepositoryImpl extends CurdRepositoryImpl<Long, User, UserPO, UserMapper, UserConverter>
         implements UserRepository {
 
     @Override

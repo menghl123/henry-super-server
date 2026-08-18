@@ -1,29 +1,12 @@
 package com.henry.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-
-import javax.crypto.Cipher;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,19 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @DisplayName("登录接口集成测试")
-class LoginIntegrationTest {
-
-    @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class LoginIntegrationTest extends AbstractIntegrationTest {
 
     /**
      * 造数据：每个用例前清空并重建用户（密码用真实 BCrypt 编码器加盐哈希，保证与生产一致）
@@ -55,15 +26,8 @@ class LoginIntegrationTest {
     @BeforeEach
     void seedData() {
         jdbcTemplate.update("DELETE FROM sys_user");
-        insertUser("admin", "admin123", "管理员", 1);
-        insertUser("disabled", "disabled123", "已禁用", 0);
-    }
-
-    private void insertUser(String username, String rawPassword, String nickname, int status) {
-        jdbcTemplate.update(
-                "INSERT INTO sys_user (id, username, password, nickname, status, creator_id, creator_name, created_time) "
-                        + "VALUES (?, ?, ?, ?, ?, 0, 'system', CURRENT_TIMESTAMP)",
-                System.nanoTime(), username, passwordEncoder.encode(rawPassword), nickname, status);
+        insertUser(1, "admin", "admin123", "管理员", 1);
+        insertUser(2, "disabled", "disabled123", "已禁用", 0);
     }
 
     // ---------- 用例 ----------
@@ -144,35 +108,5 @@ class LoginIntegrationTest {
         assertThat(stored).isNotEqualTo("admin123");
         assertThat(passwordEncoder.matches("admin123", stored)).isTrue();
         assertThat(passwordEncoder.matches("admin123x", stored)).isFalse();
-    }
-
-    // ---------- 工具 ----------
-
-    private ResponseEntity<String> login(String username, String encryptedPassword) {
-        Map<String, String> payload = new HashMap<>();
-        payload.put("username", username);
-        payload.put("password", encryptedPassword);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return restTemplate.postForEntity("/user/login", new HttpEntity<>(payload, headers), String.class);
-    }
-
-    private String fetchPublicKey() throws Exception {
-        ResponseEntity<String> resp = restTemplate.getForEntity("/user/login/public-key", String.class);
-        JsonNode body = objectMapper.readTree(resp.getBody());
-        return body.get("body").asText();
-    }
-
-    /** 模拟客户端：用服务端下发的公钥 RSA 加密明文密码（PKCS1Padding + base64） */
-    private String encryptWithPublicKey(String plaintext) throws Exception {
-        String publicKeyBase64 = fetchPublicKey();
-        byte[] keyBytes = Base64.getDecoder().decode(publicKeyBase64);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(keyBytes));
-
-        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8)));
     }
 }

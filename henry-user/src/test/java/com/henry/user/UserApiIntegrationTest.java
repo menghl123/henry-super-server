@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -238,7 +239,87 @@ class UserApiIntegrationTest extends AbstractIntegrationTest {
         assertThat(body.get("returnCode").asText()).isEqualTo("HRY0002");
     }
 
+    // ---------- 搜索 ----------
+
+    @Test
+    @DisplayName("分页按用户名模糊搜索")
+    void pageSearchByUsername() throws Exception {
+        ResponseEntity<String> resp = pageSearch(singleParam("username", "upd"));
+
+        JsonNode body = objectMapper.readTree(resp.getBody());
+        assertThat(body.get("returnCode").asText()).isEqualTo("SUC0000");
+        assertThat(body.get("body").get("total").asLong()).isEqualTo(1L);
+        assertThat(body.get("body").get("data").get(0).get("username").asText()).isEqualTo("toupdate");
+    }
+
+    @Test
+    @DisplayName("分页按昵称模糊搜索")
+    void pageSearchByNickname() throws Exception {
+        ResponseEntity<String> resp = pageSearch(singleParam("nickname", "理")); // 管理员
+
+        JsonNode body = objectMapper.readTree(resp.getBody());
+        assertThat(body.get("returnCode").asText()).isEqualTo("SUC0000");
+        assertThat(body.get("body").get("total").asLong()).isEqualTo(1L);
+        assertThat(body.get("body").get("data").get(0).get("username").asText()).isEqualTo("admin");
+    }
+
+    @Test
+    @DisplayName("分页按状态精准搜索")
+    void pageSearchByStatus() throws Exception {
+        // 全部种子用户状态均为 1（正常）
+        assertThat(objectMapper.readTree(pageSearch(singleParam("status", "1")).getBody())
+                .get("body").get("total").asLong()).isEqualTo(3L);
+        // 无禁用用户
+        assertThat(objectMapper.readTree(pageSearch(singleParam("status", "0")).getBody())
+                .get("body").get("total").asLong()).isZero();
+    }
+
+    @Test
+    @DisplayName("分页组合搜索（用户名+昵称）")
+    void pageSearchCombination() throws Exception {
+        Map<String, String> params = new HashMap<>();
+        params.put("username", "upd");
+        params.put("nickname", "待"); // 待修改 / 待删除，与 username=upd 组合后仅剩 toupdate
+        ResponseEntity<String> resp = pageSearch(params);
+
+        JsonNode body = objectMapper.readTree(resp.getBody());
+        assertThat(body.get("returnCode").asText()).isEqualTo("SUC0000");
+        assertThat(body.get("body").get("total").asLong()).isEqualTo(1L);
+        assertThat(body.get("body").get("data").get(0).get("username").asText()).isEqualTo("toupdate");
+    }
+
+    @Test
+    @DisplayName("分页组合搜索无结果")
+    void pageSearchNoMatch() throws Exception {
+        Map<String, String> params = new HashMap<>();
+        params.put("username", "zzz");
+        params.put("nickname", "不存在");
+        params.put("status", "1");
+        ResponseEntity<String> resp = pageSearch(params);
+
+        JsonNode body = objectMapper.readTree(resp.getBody());
+        assertThat(body.get("returnCode").asText()).isEqualTo("SUC0000");
+        assertThat(body.get("body").get("total").asLong()).isZero();
+        assertThat(body.get("body").get("data").size()).isZero();
+    }
+
     // ---------- 工具 ----------
+
+    private Map<String, String> singleParam(String key, String value) {
+        Map<String, String> params = new HashMap<>();
+        params.put(key, value);
+        return params;
+    }
+
+    /** 携带 token 分页搜索：按条件参数拼装 /user/page 请求（自动 URL 编码） */
+    private ResponseEntity<String> pageSearch(Map<String, String> params) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromPath("/user/page")
+                .queryParam("pageIndex", 1)
+                .queryParam("pageSize", 10);
+        params.forEach(builder::queryParam);
+        return restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET,
+                new HttpEntity<>(authHeaders(token)), String.class);
+    }
 
     /** 携带 token 发起请求：GET/DELETE 传 null，POST/PUT 传 body（Object 可被 Jackson 序列化） */
     private ResponseEntity<String> exchange(HttpMethod method, String url, Object body) {

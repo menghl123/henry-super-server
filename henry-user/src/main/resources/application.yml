@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: henry-user
+  cloud:
+    # 根 pom 引入的 spring-cloud 2021.0.0 BOM 只声明兼容 Boot 2.6.x，
+    # 与项目实际使用的 Boot 2.7.18 触发兼容性检查失败，此处关闭该启动期校验
+    compatibility-verifier:
+      enabled: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/henry_user?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
@@ -21,12 +26,27 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
-app:
-  security:
-    enabled: true
-    exclude-paths:
+# 认证配置：henry-user 签发并校验前端 token（RSA 密钥对，公私钥需匹配）
+# 注意：key 必须是 auth-properties（对应字段 authProperties，relaxed binding 不做前缀缩写）
+henry-home-common:
+  auth-properties:
+    serverName: ${spring.application.name}
+    privateKey: MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCqaM2OmO8aWlb5YYRnJKv2ZZiE2wAH/EB8wncPP+a3lXqubmTBqmce5qf5mBNWeGT3Jw2SrTb2LcaHOUtgEx5XVosSfdwiBkYJiiaA59tZbvSBrX/ToXj55Bqpuds2eK7j8gCYzxpGHr6sNnaDwUIJarkyMVISjLyJYoSuLmoOYCeYvoU4QBOUgJC9Pen/0Q9ksxEqe4YFY0hafE2SL41B6w42pYdYivKvRYju5aFKyYowL0WKGn2MqsiqknqEKYjSIM4IMqmD2qSdTlnBU4fssB0pE2oTndM+ylrrdAvvkpXYPld9+9OSPWTKFYPxBh4mAqC9U0QqJOZknhVl3aFDAgMBAAECggEAftJ8mPGMkSpGrFY8+Z47NKcruURbY5YCUFdR0FGYXWyr3wFdjxxInqC+xmy9h48WZTH1UgIDc3dh1uV3CUtxO0K3Qc3VdKUCnrroKOtlPcvrwE7lYRU9OYzfow0k7gcm8ZH7i74mKaVb9kKaNTgw810v8wDtucxvzDc7033LhGIochFoZs99pH/uDfbkbJ3qASfCen/uGLCh6EA91c5g/22JxXUjyDYSN+EA3CC6kqKFOKbwHWrp255pPJtpWdix+deh8MihQ8N/510yZnInv9KfbT7/5ybcg3b7SsEND1bDbp+WZ2g+/XKGc7O3kG1lneOpq9naszEg8wtlSz/xcQKBgQDRc++k4DutWKKQM8XIo96MTPhx1FmzK12DBgrtI2KxPyrhOYY2o93O/JDaBn79ZHWOnz6X83t08HVddC4ELqMTjblwoe2APlht0TxhQsFk55nWbSxFUXdpl9Iv6C64hMzBCCuNLpleGpnrZGfGoFfx8hJxstCxPc2XsZayQX6prwKBgQDQR6D1UQQXsUBWu05RMBkQ1VruGNifRlICoUh1F2iFZdKCJh7QvERHWPUHRNqJznjkbHta62SOcv6WHtfm/vwE8+a7G4lEoCuvjf5KD6GmouclnYrNbgUYgXGhIYBimtH+ZWzM0FIaEXA/WGtpCpLeY7HU3vgnASXVG2nEYEXqrQKBgQCOHhBY2x0i/aUwGzD0dtwmboOVGPTUMXR91rfLN9tbUPUTZSjAImf6bj0K8qVv4Z4ya7LY/4ihTBcWliIzDEHynpNY7UZtYeA2g2ZoyBbZFJy5ddI4JpLTvwQLJYut/82+nICQhzHhPEN8COCxUVLbA9mn9CDOYpUBfKo3wWDkWQKBgQC2sX3gcRYT6iiza00BLh1uhJdkLmslGrupDuvNuaC3El+aRfHVyq5hnwgfPigrpO6p/vYdBEmKIhhqedeMCbHqbj6/dSHtDkoDjZu2PwvebRowBobQN2dE3ZZcblR9Kax1Z2YOKdU6hH1fMyHUW7AEXpKIVKR7IiibS5Z06LWraQKBgQC4nGgx5iD02cE80suZI6IGT5S1CLi9RQ7n/ioas2Z2+GCCAOwx5Brh63ay+XlRbWwbh34nUiupMgtbMA/RdhQ4VbAbeGoxAoS6RrqRNPXhtvWSmvqiQ9DOrXirhrAztO7SsA35isg0NNKHalyjCuoAtlETCCBnpYrzDkh64aCjfg==
+    bizTokenTtl: 24
+    allowedEntry:
+      - "*"
+    ignorePatterns:
       - /user/login
+      - /user/login/public-key
+      - /health
       - /error
-  jwt:
-    secret: henry-super-server-jwt-secret-please-change-me-0123456789
-    expire: 7200
+    bizPatterns:
+      - /**
+  publicKey:
+    henry-home-login: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqmjNjpjvGlpW+WGEZySr9mWYhNsAB/xAfMJ3Dz/mt5V6rm5kwapnHuan+ZgTVnhk9ycNkq029i3GhzlLYBMeV1aLEn3cIgZGCYomgOfbWW70ga1/06F4+eQaqbnbNniu4/IAmM8aRh6+rDZ2g8FCCWq5MjFSEoy8iWKEri5qDmAnmL6FOEATlICQvT3p/9EPZLMRKnuGBWNIWnxNki+NQesONqWHWIryr0WI7uWhSsmKMC9Fihp9jKrIqpJ6hCmI0iDOCDKpg9qknU5ZwVOH7LAdKRNqE53TPspa63QL75KV2D5XffvTkj1kyhWD8QYeJgKgvVNEKiTmZJ4VZd2hQwIDAQAB
+
+# 登录密码传输加密：前端用公钥 RSA 加密密码后提交，服务端用私钥解密（密钥对需匹配）
+henry-user:
+  login-security:
+    public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjItSqLQecnSGS08YgnzeTJz2fa0KgSRz5k/J4QlXPcLDANQDlVCzNZJuDAfl5KuXU43ueHE84MQLoUmC8H3lUx7H5M7iOHz17NqP9N4lSecRqXEKzFMbb9IsDNAa5GXMCyX/i5zl+oyBY4s9/PU2caBDDBWCxXJuOLnocyr/Ho0mp9NornVZY83rMVHjsON8/wkxpzr8MPFMfq52Oyi8Wp8Wba1XMhbsHqUlpzahbP1JmP3EX3QxozdIEcnKCOea5gg+itxPihqmKHTjZVOUSBrxwC+8+gL387+yOi/VGbzEAOQ8MqshjRKlJiclbER8/BhBajzyKbFpduMvUQ57CQIDAQAB
+    private-key: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCMi1KotB5ydIZLTxiCfN5MnPZ9rQqBJHPmT8nhCVc9wsMA1AOVULM1km4MB+Xkq5dTje54cTzgxAuhSYLwfeVTHsfkzuI4fPXs2o/03iVJ5xGpcQrMUxtv0iwM0BrkZcwLJf+LnOX6jIFjiz389TZxoEMMFYLFcm44uehzKv8ejSan02iudVljzesxUeOw43z/CTGnOvww8Ux+rnY7KLxanxZtrVcyFuwepSWnNqFs/UmY/cRfdDGjN0gRycoI55rmCD6K3E+KGqYodONlU5RIGvHAL7z6Avfzv7I6L9UZvMQA5DwyqyGNEqUmJyVsRHz8GEFqPPIpsWl24y9RDnsJAgMBAAECggEAXYJFGOHecCB/SZPypr8V2LuGdM+w8YOjaVUk6IkidoEi5WYqjCoJUld+yJpopuBT6s/AHnqZGqLVahZS/FeHQOp17RKJCTR7G3+/0BgNj0IiSi5gFNomoxufG1dKzTO9sp0xjV5y1WSuoeB++dLcynTqpxuYym38T9nBgv7Uhyo3XpioDU72MB992x2aincGwrLqilqLZ9D8wgp0ymRCsZY0s5CnOdjC9zOObNLMjltbo5uRW9ZtcIxL1yLHFfbkjqdbzb/4ePedbgWz8qTyBBS21CtcdHaYcwUrQv7ybMRYTRlAaOBzGNAMYBvi7mFueJsjCk32MwReVLhyOw4QkQKBgQDwGBrKw8C1QBmgVTuo6XhedA69W0iEXjMkaq0ED1wQb2TL0qG0CDsnJonK0Yr25LV5K8TUN8XD33GMsAiAhND28J1ZDipMPS9zu4yWedKxxre+VRVyfqTfGTRlMyXs+6aZq6x52+sR2vtwOFgR68hi2A68t9Oj+Vo/r7nwzDcahwKBgQCV2uTAWz9FSumvAQfM9402BE+NpusJaSHv4u2z5eeZ91cXzJbDoJgVYP7V6Znzd5V23UsJ5aU3K5XYe2Jf/GLC1MZySojhFCI6xrEx+02RdLCoYyz7CUmXEjck3mX0uuunJG6n9Ci04BPXcBjYZxKnUKvFnzgObH3bZ7qd6ghR7wKBgQDOwaNI25w3ObUXym5u/mcmx8Dttg9T1h8qjCbkaSm6CYN+tquD8tal110v6JVIGhpg950vt7u5+tC4+9rGehnNndWSnE02jDYx7t+Zsd0MNPmEkZa/m2n1qaniQFK3qtqEWT9VTVo4bSC8Ofk1rZtJ6499WryJ57CdSYHRaLtHPwKBgEvkwytkSwPl77mw9OlqijrMLhoYajqm4wghzq7ohcYlTReBhu1mnP9e01E08MIsUycS5hkKFAV/7nDn9CeWo9H2ftaNRwtu7fMEg+NDWcKL7ZgqOjKdPobjM8hZVht+uzA4NE6dSixou8PFQt/+O6U/Ju98NqCfc5I10358c2BDAoGBAIvkQAbo6+WlE/2oP7vQF41Ptr+ND2bV2Rq+MkL+aQXGr3tJduosHo31z2cMq7T3MYiNuZeb16sytTQNHHAP1bTM8Uea3Ukm6bJoT8/3A0QUHGcLnOAYhgfZaeiyqqShGuXctEgNU33+bdZLAAdyB+G2Up9I3OazemODPmMfoUYK

@@ -54,6 +54,10 @@ public class HenryHomeCommonAuthFilter implements Filter {
         } else {
             try {
                 String token = httpServletRequest.getHeader(TOKEN_HEADER_NAME);
+                // 兼容标准 Authorization: Bearer <token>，也支持直接携带原始 token
+                if (token != null && token.startsWith("Bearer ")) {
+                    token = token.substring("Bearer ".length());
+                }
                 if (isInnerRequest(servletPath)) {
                     //验证内部服务调用
                     authenticateService.verifyInnerToken(token);

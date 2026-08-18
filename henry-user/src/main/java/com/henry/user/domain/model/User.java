@@ -1,77 +1,53 @@
 package com.henry.user.domain.model;
 
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import com.henry.common.ddd.domain.AuditEntity;
+import com.henry.common.ddd.domain.Identifiable;
+import lombok.EqualsAndHashCode;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 用户领域实体（纯净，无任何框架注解）
  */
-public class User {
+@Getter
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class User extends AuditEntity implements Identifiable<Long> {
 
-    private final Long id;
+    private Long id;
+
     private final String username;
+
     private final String password;
+
     private final String nickname;
-    private final Integer status;
-    private final LocalDateTime createTime;
-    private final LocalDateTime updateTime;
 
-    private User(Long id, String username, String password, String nickname,
-                 Integer status, LocalDateTime createTime, LocalDateTime updateTime) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.nickname = nickname;
-        this.status = status;
-        this.createTime = createTime;
-        this.updateTime = updateTime;
-    }
-
-    /** 从持久化数据重建 */
-    public static User of(Long id, String username, String password, String nickname,
-                          Integer status, LocalDateTime createTime, LocalDateTime updateTime) {
-        return new User(id, username, password, nickname, status, createTime, updateTime);
-    }
+    private final UserStatus status;
 
     /** 新建用户，默认状态为正常 */
     public static User create(String username, String password, String nickname) {
-        return new User(null, username, password, nickname, 1, null, null);
+        return User.builder()
+                .username(username)
+                .password(password)
+                .nickname(nickname)
+                .status(UserStatus.NORMAL)
+                .build();
     }
 
-    public boolean matchesPassword(String rawPassword) {
-        return password != null && password.equals(rawPassword);
+    /** 密码校验：存储值为 BCrypt 加盐哈希，明文只在此方法中与编码器比对 */
+    public boolean matchesPassword(String rawPassword, PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(rawPassword, password);
     }
 
     public boolean isDisabled() {
-        return status != null && status == 0;
+        return status != null && status == UserStatus.DISABLED;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
+    @Override
+    public void initId(final Long id) {
+        this.id = id;
     }
 }
