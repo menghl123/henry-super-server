@@ -15,7 +15,8 @@
       "Bash(mvn -q clean compile -DskipTests)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(mvn -pl henry-user -am test -DskipTests=false -q)"
     ]
   }
 }
