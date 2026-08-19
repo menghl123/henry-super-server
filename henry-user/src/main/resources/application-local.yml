@@ -1,14 +1,4 @@
-server:
-  port: 8081
-
 spring:
-  application:
-    name: henry-user
-  cloud:
-    # 根 pom 引入的 spring-cloud 2021.0.0 BOM 只声明兼容 Boot 2.6.x，
-    # 与项目实际使用的 Boot 2.7.18 触发兼容性检查失败，此处关闭该启动期校验
-    compatibility-verifier:
-      enabled: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/henry_user?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true

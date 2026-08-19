@@ -1,4 +1,4 @@
-package com.henry.user.adapter.controller;
+package com.henry.user.adapter.bizController;
 
 import com.henry.common.response.StandardPage;
 import com.henry.common.response.StandardResponse;
