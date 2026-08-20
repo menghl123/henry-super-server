@@ -16,7 +16,26 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(mvn -pl henry-user -am test -DskipTests=false -q)"
+      "Bash(mvn -pl henry-user -am test -DskipTests=false -q)",
+      "Bash(mvn -pl henry-file -am clean compile -DskipTests -q)",
+      "Bash(mvn -pl henry-file -am package -DskipTests -q)",
+      "Bash(echo \"started pid $!\")",
+      "Bash(taskkill //F //IM java.exe)",
+      "Bash(echo \"hello henry file 中文测试\")",
+      "Bash(printf 'line1\\\\nline2\\\\n')",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:8082/health)",
+      "Bash(curl *)",
+      "Read(//d/henry-file/uploads/20260820//**)",
+      "Read(//d/henry-file/uploads/20260820/**)",
+      "Bash(jar xf *)",
+      "Bash(unzip -l batch.zip)",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\('batch.zip'\\); print\\(z.namelist\\(\\)\\); print\\(z.read\\(z.namelist\\(\\)[0]\\)\\)\")",
+      "Bash(python -c \"import zipfile; z=zipfile.ZipFile\\('batch2.zip'\\); [print\\(n, z.read\\(n\\)\\) for n in z.namelist\\(\\)]\")",
+      "Bash(unzip -l batch2.zip)",
+      "Bash(git reset *)",
+      "Bash(mvn -pl henry-file -am test -DskipTests=false -q)",
+      "Bash(mvn -pl henry-file test -Dtest='FileApiIntegrationTest#deleteBatchWithMissingIdRollsBack' -DfailIfNoTests=false -q)",
+      "Bash(mvn -pl henry-file -am test -DskipTests=false)"
     ]
   }
 }

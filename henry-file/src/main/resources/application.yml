@@ -4,13 +4,23 @@ server:
 spring:
   application:
     name: henry-file
+  cloud:
+    # 根 pom 引入的 spring-cloud 2021.0.0 BOM 只声明兼容 Boot 2.6.x，
+    # 与项目实际使用的 Boot 2.7.18 触发兼容性检查失败，此处关闭该启动期校验
+    compatibility-verifier:
+      enabled: false
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
+  # 文件 id 中含日期路径（如 20260820/xxx.png），开启 PathPattern 解析以支持 {*id} 捕获带斜杠的路径
+  mvc:
+    pathmatch:
+      matching-strategy: path_pattern_parser
 
 app:
   security:
     enabled: false
   file:
-    storage-path: ./uploads
+    # 文件存储根目录（绝对路径）：infra 层直接读写该目录，按环境调整
+    storage-path: D:/henry-file/uploads

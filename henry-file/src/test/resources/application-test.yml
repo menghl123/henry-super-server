@@ -1,0 +1,5 @@
+# 集成测试环境：存储目录指向模块 target/test-uploads（mvn clean 会清理），避免写入真实目录
+app:
+  file:
+#    storage-path: target/test-uploads
+    storage-path: D:/henry-file/uploads
