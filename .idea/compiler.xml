@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="henry-file" />
+        <module name="henry-gateway" />
         <module name="henry-common" />
       </profile>
       <profile name="Annotation profile for henry-super-server" enabled="true">
@@ -25,6 +26,7 @@
     <bytecodeTargetLevel>
       <module name="henry-common" target="1.8" />
       <module name="henry-file" target="1.8" />
+      <module name="henry-gateway" target="1.8" />
       <module name="henry-super-server" target="1.8" />
       <module name="henry-user" target="1.8" />
     </bytecodeTargetLevel>
@@ -33,6 +35,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="henry-common" options="-parameters" />
       <module name="henry-file" options="-parameters" />
+      <module name="henry-gateway" options="-parameters" />
       <module name="henry-user" options="-parameters" />
     </option>
   </component>

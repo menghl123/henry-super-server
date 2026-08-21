@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.henry</groupId>
+        <artifactId>henry-super-server</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>henry-gateway</artifactId>
+    <name>henry-gateway</name>
+    <description>API 网关（WebFlux 响应式，端口 8080）：统一入口，代理转发 user/file 服务</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- 根 pom 的 spring-cloud 2021.0.0 BOM 仅声明兼容 Boot 2.6.x，其 Gateway 3.1.0 与项目 Boot 2.7.18 不匹配；
+                 网关模块单独覆盖为 2021.0.8（2021.0.x 线中官方支持 Boot 2.7 的版本），仅影响本模块依赖解析 -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2021.0.8</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- 网关是 WebFlux 响应式应用，不能引入 henry-common（其传递引入 spring-boot-starter-web/Security/MyBatis-Plus 等 Servlet 栈组件，与 Netty 冲突） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

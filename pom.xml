@@ -23,6 +23,7 @@
         <module>henry-common</module>
         <module>henry-user</module>
         <module>henry-file</module>
+        <module>henry-gateway</module>
     </modules>
 
     <properties>

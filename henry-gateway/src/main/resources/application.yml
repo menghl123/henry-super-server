@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: henry-gateway
+  cloud:
+    # 兼容性校验按本模块覆盖的 spring-cloud 2021.0.8 BOM 判定，理论上放行 Boot 2.7，
+    # 此处显式关闭以与 user/file 模块保持一致，避免版本判定差异导致启动失败
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      routes:
+        # 用户服务：透传 /user/**（控制器已含 /user 前缀，无需 StripPrefix）
+        - id: henry-user
+          uri: http://localhost:8081
+          predicates:
+            - Path=/user/**
+        # 文件服务：透传 /file/**（控制器已含 /file 前缀，无需 StripPrefix）
+        - id: henry-file
+          uri: http://localhost:8082
+          predicates:
+            - Path=/file/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

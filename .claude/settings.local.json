@@ -35,7 +35,21 @@
       "Bash(git reset *)",
       "Bash(mvn -pl henry-file -am test -DskipTests=false -q)",
       "Bash(mvn -pl henry-file test -Dtest='FileApiIntegrationTest#deleteBatchWithMissingIdRollsBack' -DfailIfNoTests=false -q)",
-      "Bash(mvn -pl henry-file -am test -DskipTests=false)"
+      "Bash(mvn -pl henry-file -am test -DskipTests=false)",
+      "Read(//c/Users/cmbsysadmin/.m2/repository/org/springframework/cloud/spring-cloud-dependencies/**)",
+      "Read(//c/Users/cmbsysadmin/.m2/repository/org/springframework/cloud/spring-cloud-starter-gateway/**)",
+      "Bash(timeout 30 mvn -q dependency:get -Dartifact=org.springframework.cloud:spring-cloud-dependencies:2021.0.8:pom)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(mvn -pl henry-gateway test)",
+      "Bash(mvn -pl henry-file,henry-gateway -am package -DskipTests)",
+      "Bash(java -jar target/henry-file-1.0.0-SNAPSHOT.jar)",
+      "Bash(echo \"file started, pid=$!\")",
+      "Bash(java -jar target/henry-gateway-1.0.0-SNAPSHOT.jar)",
+      "Bash(echo \"gateway started, pid=$!\")",
+      "Bash(rm -f \"D:/henry-file/uploads/20260821/17bdd9e6fae54db890a9d7ee82636e50.txt\")",
+      "Read(//d/henry-file/uploads/20260821/**)",
+      "Bash(rm -f \"D:/henry-file/uploads/20260821/17bdd9e6fae54db890a9d7ee82636e50.txt.meta.json\")",
+      "Read(//d/henry-file/uploads/**)"
     ]
   }
 }
